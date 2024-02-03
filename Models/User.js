@@ -1,5 +1,5 @@
 const mongoose= require("mongoose");
-const { stringify } = require("querystring");
+const jwt= require("jsonwebtoken");
 
 const userSchema= new mongoose.Schema({
     userName: {
@@ -24,8 +24,18 @@ const userSchema= new mongoose.Schema({
     },
     tokens: [
         {token: String}
+    ],
+    authTokens: [
+        {token: String}
     ]
 })
+
+userSchema.methods.generateJWTtoken= async function () {
+    const token= await jwt.sign({_id: this._id}, "thisisajsonwebtokensecretkeyforgeneratingauthtokens");
+    this.authTokens.push({token: token});
+    await this.save();
+    return token
+}
 
 const user= mongoose.model("user", userSchema);
 module.exports= user ;
