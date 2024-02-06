@@ -14,12 +14,13 @@ async function Login(req, res, next) {
                             const token= await match.generateJWTtoken();
                             res.cookie("authToken", token, {
                                 Domain: "http://localhost:3000",
-                                maxAge: 1000*60*15,
+                                maxAge: 1000*60*60,
                                 httpOnly: true
                             })
                             res.send({
                                 error: false,
                                 profile: {
+                                    _id: match._id,
                                     email: match.email,
                                     userName: match.userName
                                 }

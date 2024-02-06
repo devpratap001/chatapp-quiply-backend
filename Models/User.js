@@ -22,6 +22,7 @@ const userSchema= new mongoose.Schema({
         required: true,
         minLength: 8
     },
+    contacts: [String],
     tokens: [
         {token: String}
     ],

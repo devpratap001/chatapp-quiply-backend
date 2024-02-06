@@ -2,6 +2,9 @@ const express= require("express");
 const Auth = require("../Middlewares/auth");
 const cookieParser= require("cookie-parser");
 const cors= require("cors");
+const user= require("../Models/User");
+const chat= require("../Models/chat");
+const mongoose= require("mongoose");
 
 const chatRouter= express.Router();
 
@@ -17,7 +20,31 @@ chatRouter.use(function (req, res, next) {
 })
 
 chatRouter.get("/checkAuthenticated", Auth, async function (req, res, next) {
-    res.send({error: false, message: "you can proceed"})
+    res.send({error: false, profile: {_id: req.user._id, userName: req.user.userName}})
+})
+
+chatRouter.get("/allusers/:userId", async function (req, res) {
+    try {
+        const users= await user.find({}, {email:1, userName:1, _id:1});
+        const userList= users.filter(elem => elem._id.toString() !== req.params.userId.toString())
+        res.send(userList)
+    } catch (error) {
+        res.send({error: true, message: error.message})
+    }
+})
+
+chatRouter.get("/getcontacts/:contactId", async function (req, res) {
+    try {
+        const contacts= []
+        const contactsFound= await user.findOne({_id: req.params.contactId}, {_id:0, contacts:1});
+        for(let contact of contactsFound.contacts){
+            responseUser= await user.findOne({_id: new mongoose.Types.ObjectId(contact)}, {_id:1, email:1, userName:1});
+            contacts.push(responseUser);
+        };
+        res.send(contacts);
+    } catch (error) {
+        res.send({error: true, message: error.message})
+    }
 })
 
 chatRouter.get("/logout", Auth, async function (req, res, next) {
