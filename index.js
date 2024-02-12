@@ -7,17 +7,24 @@ const cors= require("cors");
 const {Register}= require("./Middlewares/register");
 const {Login} = require("./Middlewares/login");
 const {VerifyEmail} = require("./Middlewares/verifyEmail");
-const chatRouter = require("./Router/chatapp");
+const chatRoute = require("./Router/chatapp");
+const {Server} = require("socket.io");
 
 const port= process.env.PORT || 5000 ;
 const app= express();
 const server= createServer(app);
+const io= new Server(server, {
+    cors: {
+        origin: "http://localhost:3000",
+        credentials: true
+    }
+});
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(cors({origin: "http://localhost:3000", credentials: true}))
-app.use("/chatapp", chatRouter)
+app.use("/chatapp", chatRoute(io));
 
 mongoose.connect(process.env.DATABASE_KEY)
 .then(() => {console.log("mongodb connected successfully");})
